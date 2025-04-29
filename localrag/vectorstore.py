@@ -31,12 +31,11 @@ class VectorStore:
         with open(f"{self.vector_store_path}.json", 'w') as f:
             json.dump({"ids": self.vector_ids, "texts": self.vector_texts}, f)
         
-    def add(self, chat_id, message_index, text):
-        message_id = f"{chat_id}:{message_index}"
+    def add(self, chat_id, text):
         embedding = self.embedding_model.encode([text])[0]
         embedding = embedding.reshape(1, -1).astype('float32')
         self.vector_index.add(embedding)
-        self.vector_ids.append(message_id)
+        self.vector_ids.append(chat_id)
         self.vector_texts.append(text)
         self.save()
         
@@ -49,8 +48,8 @@ class VectorStore:
         results = []
         for i, idx in enumerate(indices[0]):
             if idx < len(self.vector_ids) and idx >= 0:
-                message_id = self.vector_ids[idx]
+                chat_id = self.vector_ids[idx]
                 text = self.vector_texts[idx]
                 distance = distances[0][i]
-                results.append((message_id, text, distance))
+                results.append((chat_id, text, distance))
         return results
