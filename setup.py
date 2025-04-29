@@ -1,9 +1,10 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="localrag",
     version="0.1.0",
-    packages=["localrag"],
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     install_requires=[
         "click>=8.0.0",
         "openai>=1.0.0",
