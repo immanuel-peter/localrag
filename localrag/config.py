@@ -26,11 +26,25 @@ def configure_api_keys(config_path, console):
     console.print(Panel.fit("LocalRAG Configuration", style="bold green"))
     console.print("Set your API keys for different LLM providers.")
     console.print("Leave blank to keep existing keys.\n")
-    openai_key = Prompt.ask("[bold]OpenAI API Key[/bold]", password=True, default="")
+    openai_env = os.environ.get("OPENAI_API_KEY")
+    anthropic_env = os.environ.get("ANTHROPIC_API_KEY")
+
+    # Use env var as fallback default in prompt
+    openai_key = Prompt.ask(
+        "[bold]OpenAI API Key[/bold]",
+        password=True,
+        default=openai_env if openai_env else ""
+    )
     if openai_key:
         config["OPENAI_API_KEY"] = openai_key
-    anthropic_key = Prompt.ask("[bold]Anthropic API Key[/bold]", password=True, default="")
+
+    anthropic_key = Prompt.ask(
+        "[bold]Anthropic API Key[/bold]",
+        password=True,
+        default=anthropic_env if anthropic_env else ""
+    )
     if anthropic_key:
         config["ANTHROPIC_API_KEY"] = anthropic_key
+
     save_config(config_path, config)
     console.print("\n[green]Configuration saved![/green]")

@@ -4,7 +4,6 @@ import faiss
 from sentence_transformers import SentenceTransformer
 
 class VectorStore:
-
     def __init__(self, vector_store_path, embedding_model_name):
         self.vector_store_path = vector_store_path
         self.embedding_model = SentenceTransformer(embedding_model_name)
