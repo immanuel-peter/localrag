@@ -12,10 +12,8 @@ license = {text = "MIT"}
 authors = [
     {name = "Immanuel Peter"}
 ]
-url = "https://github.com/immanuel-peter/localrag"
-scripts = [
-    "localrag = localrag.cli:cli"
-]
+urls = {homepage = "https://github.com/immanuel-peter/localrag"}
+
 dependencies = [
   "click>=8.0.0",
   "openai>=1.0.0",
@@ -27,5 +25,8 @@ dependencies = [
   "numpy>=1.20.0"
 ]
 
+[project.scripts]
+localrag = "localrag.cli:cli"
+
 [tool.setuptools.packages.find]
-where = "src"
+where = ["src"]
