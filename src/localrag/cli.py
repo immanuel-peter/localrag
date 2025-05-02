@@ -130,12 +130,13 @@ def run(model):
             # Normal chat turn
             chat["messages"].append({"role": "user", "content": user_input})
 
+
             # Retrieve context
             context = get_relevant_context(vector_store, user_input)
 
             for i in range(len(chat["messages"]) - 1, -1, -1):
                 if chat["messages"][i]["role"] == "user":
-                    chat["messages"][i]["content"] = f"(Relevant context: {context})\n\n{chat['messages'][i]['content']}"
+                    chat["messages"][i]["context"] = context
                     break
 
             console.print("\n[bold green]assistant[/bold green] >", end=" ") # Use end=" " to keep the cursor on the same line
@@ -170,6 +171,10 @@ def saved(continue_chat):
     """List saved chats or continue a specific chat."""
     chats = get_all_chats(CHATS_DIR)
     favorite_chats = [chat for chat in chats if chat.get("favorite", False)]
+
+    if not chats:
+        console.print("[yellow]No chats found at all.[/yellow]")
+        return
 
     if continue_chat is not None:
         # Adjust index for 0-based list vs 1-based user input
@@ -259,12 +264,13 @@ def saved(continue_chat):
                     # Normal chat turn in a continued conversation
                     chat["messages"].append({"role": "user", "content": user_input})
 
+
                     # Retrieve context
                     context = get_relevant_context(vector_store, user_input)
 
                     for i in range(len(chat["messages"]) - 1, -1, -1):
                         if chat["messages"][i]["role"] == "user":
-                            chat["messages"][i]["content"] = f"(Relevant context: {context})\n\n{chat['messages'][i]['content']}"
+                            chat["messages"][i]["context"] = context
                             break
 
                     console.print("\n[bold green]assistant[/bold green] >", end=" ")
@@ -284,26 +290,13 @@ def saved(continue_chat):
                     chat["updated_at"] = datetime.datetime.now().isoformat()
                     save_chat(CHATS_DIR, chat)
 
+    else:
+        console.print(Panel.fit("Saved Chats", style="bold green"))
+        if not favorite_chats:
+            console.print("[yellow]No saved chats found.[/yellow]")
         else:
-            console.print(Panel.fit("Saved Chats", style="bold green"))
-            if not favorite_chats:
-                console.print("[yellow]No saved chats found.[/yellow]")
-            else:
-                for i, chat in enumerate(favorite_chats, 1):
-                    # Handle potential missing 'created_at' gracefully
-                    created_date_str = chat.get("created_at", "")
-                    try:
-                        created_date = datetime.datetime.fromisoformat(created_date_str).strftime("%Y-%m-%d")
-                    except (ValueError, TypeError):
-                        created_date = "Unknown date" # Or handle as appropriate
-
-                    message_count = len(chat.get("messages", []))
-                    # Display chat information
-                    console.print(
-                        f"[bold]{i}.[/bold] {chat.get('title', 'Untitled Chat')} " # Use .get for title safety
-                        f"[dim]({chat.get('model', 'Unknown Model')}, {created_date}, {message_count//2} exchanges)[/dim]"
-                    )
-                console.print("\nRun [bold]localrag saved -c NUMBER[/bold] to continue a chat")
+            for i, chat in enumerate(favorite_chats, 1):
+                console.print(f"[bold]{i}.[/bold] {chat['title']} [dim]({chat['model']})[/dim]")
 
 
 @cli.command()

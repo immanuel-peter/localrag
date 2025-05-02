@@ -67,7 +67,15 @@ def send_message_to_llm(model, messages, config, context="", console=None):
     """
     Send a message to the correct LLM (OpenAI or Anthropic) based on model.
     """
-    formatted_messages = [{"role": msg["role"], "content": msg["content"]} for msg in messages]
+    # formatted_messages = [{"role": msg["role"], "content": msg["content"]} for msg in messages]
+    formatted_messages = []
+    for msg in messages:
+        if msg["role"] == "user":
+            content = f"(Relevant context: {msg['context']})\n\n{msg['content']}"
+        else:
+            content = msg["content"]
+        formatted_messages.append({"role": msg["role"], "content": content})
+
 
     full_response = ""
     spinner_thread = None

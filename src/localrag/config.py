@@ -29,22 +29,26 @@ def configure_api_keys(config_path, console):
     openai_env = os.environ.get("OPENAI_API_KEY")
     anthropic_env = os.environ.get("ANTHROPIC_API_KEY")
 
-    # Use env var as fallback default in prompt
+    # Show a masked indicator if env var is set
+    openai_prompt_default = "env key set" if openai_env else ""
+    anthropic_prompt_default = "env key set" if anthropic_env else ""
+
     openai_key = Prompt.ask(
         "[bold]OpenAI API Key[/bold]",
         password=True,
-        default=openai_env if openai_env else ""
+        default=openai_prompt_default
     )
-    if openai_key:
+    if openai_key and openai_key != "env key set":
         config["OPENAI_API_KEY"] = openai_key
 
     anthropic_key = Prompt.ask(
         "[bold]Anthropic API Key[/bold]",
         password=True,
-        default=anthropic_env if anthropic_env else ""
+        default=anthropic_prompt_default
     )
-    if anthropic_key:
+    if anthropic_key and anthropic_key != "env key set":
         config["ANTHROPIC_API_KEY"] = anthropic_key
+
 
     save_config(config_path, config)
     console.print("\n[green]Configuration saved![/green]")
