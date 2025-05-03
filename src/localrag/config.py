@@ -15,7 +15,13 @@ def ensure_config_exists(config_path, default_model):
 
 def load_config(config_path):
     with open(config_path, 'r') as f:
-        return json.load(f)
+        config = json.load(f)
+    
+    config["OPENAI_API_KEY"] = config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    config["ANTHROPIC_API_KEY"] = config.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
+    
+    return config
+
 
 def save_config(config_path, config):
     with open(config_path, 'w') as f:
