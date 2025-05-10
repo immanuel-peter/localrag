@@ -1,24 +1,23 @@
 # LocalRAG
 
 **LocalRAG** is a terminal-based LLM chat tool with infinite memory through local vector search.
-It turns your terminal into a Claude/ChatGPT-style interface with persistent, searchable conversation memory.
+It turns your terminal into a Claude/ChatGPT/OpenAI/Gemini/Ollama-style interface with persistent, searchable conversation memory.
 
 ---
 
 ## Features
 
-- ✨ Interactive chat experience with LLMs
-- 📅 Infinite memory via FAISS vectorstore
-- 📂 Save and continue favorite chats
-- 🔄 Switch models mid-session (when possible)
-- 💡 Context retrieval for smarter conversations
-- ⚖️ Supported models:
-  - GPT-4.1 ("gpt-4.1")
-  - GPT-4o-mini ("gpt-4o-mini")
-  - Claude 3.7 Sonnet ("claude-3.7")
-  - Claude 3.5 Haiku ("claude-3.5")
-- ⭐ Update checker built-in
-- ⚖️ 100% local and privacy-respecting
+- ✨ Interactive chat with leading OpenAI, Anthropic, Gemini, xAI, and local Ollama models
+- 🧠 Infinite chat memory via local FAISS vectorstore (Retrieval-Augmented Generation)
+- 📂 Save and continue favorite chats at any time (across all models)
+- 🏷️ Automatic, smart conversation titling for easy recall
+- 🔄 Switch models live (config and CLI) including local/proprietary
+- 🖼️ Send images directly in chat with `\image <path>` (for vision-capable models)
+- 🔑 New, unified config: supports OpenAI/Anthropic/Gemini/xAI/Ollama in one flow
+- 🍃 Local LLM support via Ollama: Run Llama, Gemma, DeepSeek, Phi, and more on your machine!
+- 📜 Expanded model list (`localrag models`), returns both proprietary and local models with context window size
+- ⭐ Update checker: easily update to the latest version via the CLI
+- 🚫 100% local & privacy-respecting. Your chat memory never leaves your device.
 
 ---
 
@@ -28,55 +27,60 @@ It turns your terminal into a Claude/ChatGPT-style interface with persistent, se
 pip install git+https://github.com/immanuel-peter/localrag.git
 ```
 
-Make sure you have Python 3.8+ installed.
+Requires Python 3.8 or higher.
+
+Optional for Local LLMs:
+Install [Ollama](https://ollama.com/download). It is recommended to pull all of the models you want to use first and then use LocalRAG for a much more rich experience.
 
 ---
 
 ## Quickstart
 
-### 1. Configure API Keys
+### 1. Configure API Keys and Providers
 
 ```bash
 localrag config
 ```
 
-You'll be prompted to set your OpenAI and Anthropic API keys.
+You'll be prompted to set OpenAI, Anthropic, Google Gemini, and xAI API keys. You may also configure Ollama if installed.
+Also set your default model!
 
-### 2. Start a New Chat
+---
+
+### 2. Start a Chat (with ANY Supported Model)
 
 ```bash
 localrag run gpt-4.1
-```
-
-or use a supported alias like `gpt-4o-mini`.
-
-```bash
 localrag run claude-3.7
+localrag run gemini-2.5-pro
+localrag run llama-4-scout
 ```
+
+Use `localrag models` to see all valid aliases!
+
+---
 
 ### 3. Chat Commands
 
-Inside a chat session, you can type:
+| Command           | Action                                          |
+| :---------------- | :---------------------------------------------- |
+| `\save`           | Save chat as favorite                           |
+| `\clear`          | Clear current chat                              |
+| `\switch <model>` | Switch LLM/model if no messages sent            |
+| `\image <path>`   | Attach image to next user message (vision LLMs) |
+| `\quit`           | Exit LocalRAG                                   |
+| `\help`           | Show available commands                         |
 
-| Command           | Action                           |
-| :---------------- | :------------------------------- |
-| `\save`           | Save chat as favorite            |
-| `\clear`          | Clear current chat               |
-| `\switch <model>` | Switch model if no messages sent |
-| `\quit`           | Exit LocalRAG                    |
-| `\help`           | Show available commands          |
+---
 
-### 4. View Saved Chats
+### 4. View and Continue Saved Chats
 
 ```bash
 localrag saved
-```
-
-Continue chatting by selecting the chat number:
-
-```bash
 localrag saved -c 2
 ```
+
+---
 
 ### 5. Update LocalRAG
 
@@ -88,82 +92,87 @@ localrag update
 
 ## Persistent Storage
 
-Everything is stored locally at:
+Everything is local:
 
 ```
 ~/.localrag/
 ├── chats/             # Individual chat JSON files
-├── vector_store.faiss # FAISS index
+├── vector_store.faiss # FAISS index (chat context memory)
 ├── vector_store.json  # Metadata (chat IDs)
 ├── config.json        # API keys and default model
 ```
 
-**LocalRAG never sends chat history to any server.**
+**Your chat memory never leaves your device.**
 
 ---
 
 ## How It Works
 
-- 🔹 Each message (user and assistant) is embedded into a vector database (FAISS).
-- 🔹 When a user types a new message, LocalRAG queries past messages for relevant context.
-- 🔹 The retrieved context is prepended into the new prompt to the LLM.
-- 🔹 Infinite memory means smarter conversations over time.
+- Each message (user and assistant) is embedded via sentence-transformers into a FAISS vector DB
+- Every new user message is contextually enriched by searching all past chats for relevant history
+- Context is added to your model prompt (no cloud API sees your full memory)
+- Smarter, more personalized and contextual conversations—across models/providers
+- You can use both local and proprietary LLMs in same CLI
 
 ---
 
-## Supported Models
+## Supported Models (Proprietary & Local)
 
-Run:
+See full live list with:
 
 ```bash
 localrag models
 ```
 
-Currently supported:
+Examples of currently supported:
 
-| Alias         | Full Name                | Provider  |
-| :------------ | :----------------------- | :-------- |
-| `gpt-4.1`     | gpt-4.1                  | OpenAI    |
-| `gpt-4o-mini` | gpt-4o-mini              | OpenAI    |
-| `claude-3.7`  | claude-3-7-sonnet-latest | Anthropic |
-| `claude-3.5`  | claude-3-5-haiku-latest  | Anthropic |
+**Proprietary:**
+
+- `gpt-4.1`, `gpt-4o-mini`, `o4-mini`, `o3` (OpenAI)
+- `claude-3.7`, `claude-3.5` (Anthropic)
+- `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.0` (Google)
+- `grok-3` (xAI)
+
+**Local/Ollama:**
+
+- `llama-4-scout`, `llama-4-maverick`, `llama-3.3` (Meta)
+- `gemma3` (Google), `deepseek-r1` (DeepSeek), `phi-4-mini` (Microsoft), and more!
 
 ---
 
 ## Contributing
 
-Contributions are welcome! 🚀
+Contributions are very welcome! 🚀
 
-If you want to:
+Want to:
 
-- Add support for more LLMs
-- Improve vector search and RAG
-- Add CLI features or slash commands
-- Enhance performance and UX
+- Add support for new LLMs/providers/local models?
+- Improve vector search/RAG logic?
+- Add slash commands, CLI features, or file support?
+- Enhance performance or UX?
 
-please submit a Pull Request.
+Please fork, branch, and submit a pull request with your improvements.
+Keep PRs focused and modular!
 
-### How to Contribute
-
-1. Fork this repo
-2. Create a new branch: `git checkout -b my-feature`
-3. Make your changes
-4. Submit a PR describing what you added or improved
-5. Keep PRs focused and modular!
+---
 
 ## License
 
 MIT License.
-
 Made by Immanuel Peter.
 
 ---
 
 ## Future Ideas
 
-- Smarter context window sizing
+- Chat with files
 - Session-based summaries
-- Custom RAG pipelines
-- Plugin system
+- Custom/plug-in RAG pipelines
+- Usage of custom models
 
 Stay tuned!
+
+---
+
+**Breaking change:**
+If you have used previous versions, please re-run `localrag config` to refresh your keys and set up new provider options!
