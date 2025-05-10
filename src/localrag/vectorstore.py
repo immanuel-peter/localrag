@@ -2,6 +2,7 @@ import os
 import json
 import faiss
 from sentence_transformers import SentenceTransformer
+from rich.console import Console
 
 class VectorStore:
     def __init__(self, vector_store_path, embedding_model_name):
@@ -11,6 +12,7 @@ class VectorStore:
         self.vector_index = None
         self.vector_ids = []
         self.vector_texts = []
+        self.console = Console()
         self._load_or_init()
         
     def _load_or_init(self):
@@ -30,9 +32,14 @@ class VectorStore:
         faiss.write_index(self.vector_index, f"{self.vector_store_path}.faiss")
         with open(f"{self.vector_store_path}.json", 'w') as f:
             json.dump({"ids": self.vector_ids, "texts": self.vector_texts}, f)
+    
+    def _get_embedding(self, text):
+        """Get embedding for text using sentence-transformers."""
+        # Always use sentence-transformers for embeddings
+        return self.embedding_model.encode([text])[0]
         
     def add(self, chat_id, text):
-        embedding = self.embedding_model.encode([text])[0]
+        embedding = self._get_embedding(text)
         embedding = embedding.reshape(1, -1).astype('float32')
         self.vector_index.add(embedding)
         self.vector_ids.append(chat_id)
@@ -42,7 +49,7 @@ class VectorStore:
     def search(self, query, top_k=5):
         if self.vector_index.ntotal == 0:
             return []
-        query_embedding = self.embedding_model.encode([query])[0]
+        query_embedding = self._get_embedding(query)
         query_embedding = query_embedding.reshape(1, -1).astype('float32')
         distances, indices = self.vector_index.search(query_embedding, min(top_k, self.vector_index.ntotal))
         results = []
