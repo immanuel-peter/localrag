@@ -475,7 +475,9 @@ def get_relevant_context(vector_store: VectorStore, query: str):
     context_parts = []
 
     for message_id, text, score in results:
-        if score >= SIMILARITY_THRESHOLD:
+        # FAISS returns L2 distances where lower is more similar. Use
+        # `<=` to filter for only highly similar results.
+        if score <= SIMILARITY_THRESHOLD:
             try:
                 chat_id, msg_idx_str = message_id.split(":")
                 msg_idx = int(msg_idx_str)
