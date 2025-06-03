@@ -465,7 +465,10 @@ def get_relevant_context(vector_store: VectorStore, query: str):
     Searches the vector store for context relevant to the query.
     Returns a formatted string of relevant context.
     """
-    SIMILARITY_THRESHOLD = 0.7
+    # With FAISS `IndexFlatL2` the search scores are squared L2 distances.
+    # Empirically, values below ~0.3 correspond to highly similar text when
+    # using the default MiniLM embeddings.
+    SIMILARITY_THRESHOLD = 0.3
 
     results = vector_store.search(query)
 
