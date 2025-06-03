@@ -465,7 +465,10 @@ def get_relevant_context(vector_store: VectorStore, query: str):
     Searches the vector store for context relevant to the query.
     Returns a formatted string of relevant context.
     """
-    SIMILARITY_THRESHOLD = 0.7
+    # With FAISS `IndexFlatL2` the search scores are squared L2 distances.
+    # Empirically, values below ~0.3 correspond to highly similar text when
+    # using the default MiniLM embeddings.
+    SIMILARITY_THRESHOLD = 0.3
 
     results = vector_store.search(query)
 
@@ -475,7 +478,9 @@ def get_relevant_context(vector_store: VectorStore, query: str):
     context_parts = []
 
     for message_id, text, score in results:
-        if score >= SIMILARITY_THRESHOLD:
+        # FAISS returns L2 distances where lower is more similar. Use
+        # `<=` to filter for only highly similar results.
+        if score <= SIMILARITY_THRESHOLD:
             try:
                 chat_id, msg_idx_str = message_id.split(":")
                 msg_idx = int(msg_idx_str)
